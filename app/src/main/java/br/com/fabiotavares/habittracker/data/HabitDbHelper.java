@@ -62,7 +62,7 @@ public class HabitDbHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    private String createTable(){
+    private String createTable() {
         String createTable = "CREATE TABLE " + HabitContract.HabitEntry.TABLE_NAME +
                 "(" + HabitContract.HabitEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 HabitContract.HabitEntry.COLUMN_DATE + " STRING NOT NULL," +
@@ -72,7 +72,7 @@ public class HabitDbHelper extends SQLiteOpenHelper {
         return createTable;
     }
 
-    private String dropTable(){
+    private String dropTable() {
         String dropTable = "DROP TABLE " + HabitContract.HabitEntry.TABLE_NAME + ";";
         Log.v("HabitDbHelper", "drop table: " + dropTable);
         return dropTable;

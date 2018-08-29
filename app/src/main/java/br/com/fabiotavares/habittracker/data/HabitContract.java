@@ -3,6 +3,7 @@ package br.com.fabiotavares.habittracker.data;
 import android.provider.BaseColumns;
 
 public class HabitContract {
+
     public HabitContract() {
     }
 

@@ -13,7 +13,6 @@ import br.com.fabiotavares.habittracker.data.HabitDbHelper;
 
 public class MainActivity extends AppCompatActivity {
 
-
     private static final String TAG = MainActivity.class.getName();
 
     @Override
