@@ -5,107 +5,76 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import br.com.fabiotavares.habittracker.MainActivity;
+import android.util.Log;
 
 public class HabitDbHelper extends SQLiteOpenHelper {
 
+    private static final String DATABASE_NAME = "habit_tracker.db";
+    private static final int DATABASE_VERSION = 1;
+
     public HabitDbHelper(Context context) {
-        super(context, HabitContract.DB_NAME, null, HabitContract.DB_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
-        String createTable = "CREATE TABLE IF NOT EXISTS " + HabitContract.HabitEntry.TABLE + " (" + HabitContract.HabitEntry.COL_TASK_HABIT_NAME + " VARCHAR, " + HabitContract.HabitEntry.COL_TASK_HABIT_FREQ + " INT(3))";
-        db.execSQL(createTable);
+    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.execSQL(createTable());
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + HabitContract.HabitEntry.TABLE);
-        onCreate(db);
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        sqLiteDatabase.execSQL(dropTable());
+        sqLiteDatabase.execSQL(createTable());
     }
 
-    public void deleteDatabase() {
-        this.deleteHabitsDB();
+    @Override
+    public void onDowngrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        sqLiteDatabase.execSQL(dropTable());
+        sqLiteDatabase.execSQL(createTable());
     }
 
-
-    public void deleteHabitsDB() {
-        String deleteScript = "delete from " + HabitContract.HabitEntry.TABLE;
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL(deleteScript);
-    }
-
-    public void insert(String habitName) {
-        int defaultFreq = 0;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-
+    public void insertHabit(String date, int habit, String comment) {
+        SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(HabitContract.HabitEntry.COL_TASK_HABIT_NAME, habitName);
-        values.put(HabitContract.HabitEntry.COL_TASK_HABIT_FREQ, defaultFreq);
+        values.put(HabitContract.HabitEntry.COLUMN_DATE, date);
+        values.put(HabitContract.HabitEntry.COLUMN_HABIT, habit);
+        values.put(HabitContract.HabitEntry.COLUMN_COMMENT, comment);
+        db.insert(HabitContract.HabitEntry.TABLE_NAME, null, values);
+    }
 
-        db.insertWithOnConflict(HabitContract.HabitEntry.TABLE,
+    public Cursor readHabits() {
+        SQLiteDatabase db = getReadableDatabase();
+        String[] projection = {
+                HabitContract.HabitEntry._ID,
+                HabitContract.HabitEntry.COLUMN_DATE,
+                HabitContract.HabitEntry.COLUMN_HABIT,
+                HabitContract.HabitEntry.COLUMN_COMMENT
+        };
+        Cursor cursor = db.query(
+                HabitContract.HabitEntry.TABLE_NAME,
+                projection,
                 null,
-                values,
-                SQLiteDatabase.CONFLICT_REPLACE);
-
-        db.close();
-
+                null,
+                null,
+                null,
+                null
+        );
+        return cursor;
     }
 
-    public void update(int position) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor c = db.rawQuery("SELECT * FROM habits WHERE habit = " + "'" + MainActivity.habitListName.get(position).toString() + "'", null);
-
-        try {
-            int habitIndex = c.getColumnIndex(HabitContract.HabitEntry.COL_TASK_HABIT_NAME);
-            int frequencyIndex = c.getColumnIndex(HabitContract.HabitEntry.COL_TASK_HABIT_FREQ);
-
-
-            if (c != null && c.moveToFirst()) {
-                do {
-                    int updatedFreq = c.getInt(frequencyIndex) + 1;
-                    ContentValues values = new ContentValues();
-                    values.put(HabitContract.HabitEntry.COL_TASK_HABIT_NAME, c.getString(habitIndex));
-                    values.put(HabitContract.HabitEntry.COL_TASK_HABIT_FREQ, updatedFreq);
-
-                    db.update(HabitContract.HabitEntry.TABLE, values, HabitContract.HabitEntry.COL_TASK_HABIT_NAME + " = ?",
-                            new String[]{String.valueOf(c.getString(habitIndex))});
-                } while (c.moveToNext());
-            }
-
-            c.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private String createTable(){
+        String createTable = "CREATE TABLE " + HabitContract.HabitEntry.TABLE_NAME +
+                "(" + HabitContract.HabitEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                HabitContract.HabitEntry.COLUMN_DATE + " STRING NOT NULL," +
+                HabitContract.HabitEntry.COLUMN_HABIT + " INTEGER NOT NULL," +
+                HabitContract.HabitEntry.COLUMN_COMMENT + " STRING NOT NULL);";
+        Log.v("HabitDbHelper", "create table: " + createTable);
+        return createTable;
     }
 
-    public void read() {
-        try {
-            SQLiteDatabase db = this.getWritableDatabase();
-
-            String queryString = "SELECT * FROM habits";
-
-            Cursor c = db.rawQuery(queryString, null);
-
-            int habitIndex = c.getColumnIndex(HabitContract.HabitEntry.COL_TASK_HABIT_NAME);
-            int frequencyIndex = c.getColumnIndex(HabitContract.HabitEntry.COL_TASK_HABIT_FREQ);
-
-            if (c != null && c.moveToFirst()) {
-                do {
-                    String habit = c.getString(habitIndex) + " : " + Integer.toString(c.getInt(frequencyIndex));
-                    MainActivity.habitListName.add(c.getString(habitIndex));
-                    MainActivity.habitList.add(habit);
-
-                } while (c.moveToNext());
-            }
-
-            c.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private String dropTable(){
+        String dropTable = "DROP TABLE " + HabitContract.HabitEntry.TABLE_NAME + ";";
+        Log.v("HabitDbHelper", "drop table: " + dropTable);
+        return dropTable;
     }
 }

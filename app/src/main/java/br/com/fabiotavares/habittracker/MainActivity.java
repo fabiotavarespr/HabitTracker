@@ -1,89 +1,43 @@
 package br.com.fabiotavares.habittracker;
 
-import android.database.sqlite.SQLiteDatabase;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
+import android.util.Log;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import br.com.fabiotavares.habittracker.data.HabitContract;
 import br.com.fabiotavares.habittracker.data.HabitDbHelper;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static ArrayList<String> habitList = new ArrayList<String>();
-    public static ArrayList<String> habitListName = new ArrayList<String>();
-    private EditText habitNameTF;
 
-    private Button submitBtn;
-    private SQLiteDatabase myDatabase;
-    private ListView habitListView;
-    private ArrayAdapter<String> arrayAdapter;
-    private HabitDbHelper mHelper;
-    private Button deleteTable;
+    private static final String TAG = MainActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        habitListView = (ListView) findViewById(R.id.habitListView);
-        habitNameTF = (EditText) findViewById(R.id.habitNameTF);
 
-        submitBtn = (Button) findViewById(R.id.submitBtn);
-        deleteTable = (Button) findViewById(R.id.deleteTable);
+        HabitDbHelper habitDbHelper = new HabitDbHelper(this);
 
-        mHelper = new HabitDbHelper(this);
+        habitDbHelper.insertHabit(createDate(), HabitContract.HabitEntry.HABIT_PROGRAMMING, "Android programming");
+        habitDbHelper.insertHabit(createDate(), HabitContract.HabitEntry.HABIT_PROGRAMMING, "Java programming");
+        habitDbHelper.insertHabit(createDate(), HabitContract.HabitEntry.HABIT_STUDYING, "Studying on udacity");
+        habitDbHelper.insertHabit(createDate(), HabitContract.HabitEntry.HABIT_WORKOUT, "Swimming in the pool");
 
-        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, habitList);
-        habitListView.setAdapter(arrayAdapter);
-
-        getFromDB();
-
-        submitBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String habitName = habitNameTF.getText().toString();
-                mHelper.insert(habitName);
-                getFromDB();
-                arrayAdapter.notifyDataSetChanged();
-            }
-        });
-
-        deleteTable.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                habitList.clear();
-                habitListName.clear();
-                mHelper.deleteHabitsDB();
-                getFromDB();
-                arrayAdapter.notifyDataSetChanged();
-            }
-        });
-
-        habitListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mHelper.update(position);
-                getFromDB();
-            }
-
-
-        });
-    }
-
-    private void getFromDB() {
-        habitList.clear();
-        habitListName.clear();
-        try {
-            mHelper.read();
-        } catch (Exception e) {
-            e.printStackTrace();
+        Cursor cursor = habitDbHelper.readHabits();
+        while (cursor.moveToNext()) {
+            Log.v(TAG, "habit: " + cursor.getInt(0) + " " + cursor.getInt(1) +
+                    " " + cursor.getInt(2) + " " + cursor.getString(3));
         }
-        arrayAdapter.notifyDataSetChanged();
     }
+
+    private String createDate() {
+        String formatDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        return formatDate;
+    }
+
 }

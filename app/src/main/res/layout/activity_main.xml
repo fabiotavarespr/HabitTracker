@@ -9,39 +9,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/habitNameTF"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:hint="Digite um hábito..." />
-
-    <Button
-        android:id="@+id/submitBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/habitNameTF"
-        android:layout_centerHorizontal="true"
-        android:text="Inserir hábito" />
-
-    <ListView
-        android:id="@+id/habitListView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/submitBtn"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:id="@+id/deleteTable"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/habitListView"
-        android:layout_toEndOf="@+id/submitBtn"
-        android:layout_toRightOf="@+id/submitBtn"
-        android:text="Limpar hábitos" />
+        android:text="Habit Tracker" />
 
 </RelativeLayout>
